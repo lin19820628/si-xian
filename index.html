@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#63c8bf">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="思與阿弦">
+<link rel="manifest" href="manifest.json">
+<title>思與阿弦</title>
+<style>
+:root{--bg:#eafaf8;--card:#fff;--ink:#263b39;--muted:#78918d;--accent:#62c8bd;--accent2:#d9f3ef;--line:#cfe8e4;--pink:#efb1c4}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,var(--bg),#fff 72%);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC",sans-serif;color:var(--ink)}
+.app{max-width:520px;margin:auto;min-height:100vh;padding:22px 18px 90px}
+.hero{padding:8px 3px 18px}.tiny{font-size:11px;letter-spacing:.18em;color:var(--muted)}
+h1{margin:7px 0 3px;font-size:30px}.sub{font-size:14px;color:var(--muted)}
+.heart{float:right;font-size:28px}.card{background:#ffffffd9;border:1px solid var(--line);border-radius:24px;padding:18px;margin:12px 0;box-shadow:0 8px 24px #4eaaa31a}
+.greeting{background:linear-gradient(135deg,#65c9bf,#8ed9d1);color:white;border:0}.greeting b{font-size:21px}.greeting p{margin:9px 0 0;line-height:1.7;font-size:14px}
+.stats{display:flex;gap:10px}.stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px}.stat b{display:block;font-size:22px}.stat span{font-size:11px;color:var(--muted)}
+h2{font-size:16px;margin:0 0 12px}.task{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid #edf3f2}.task:last-child{border:0}
+.check{appearance:none;width:25px;height:25px;border:2px solid #a9c9c5;border-radius:8px;background:#fff}.check:checked{background:var(--accent);border-color:var(--accent)}.check:checked:after{content:"✓";display:block;text-align:center;color:white;font-weight:900;line-height:21px}.task.done .tt{text-decoration:line-through;color:#99aaa7}.tt{font-size:15px;font-weight:700}.tn{font-size:11px;color:var(--muted);margin-top:3px}
+textarea{width:100%;border:1px solid var(--line);border-radius:15px;padding:12px;font:inherit;resize:vertical;background:#fbfffe}
+button{border:0;border-radius:15px;padding:12px 15px;font-weight:800;font-size:14px;background:var(--accent);color:#fff;margin-top:9px}.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.quote{text-align:center;color:#8a9b98;font-size:13px;line-height:1.7;margin-top:20px}.pink{color:#d98ba2}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero"><span class="heart">♡</span><div class="tiny">ONLY FOR SI &amp; AXIAN</div><h1>思與阿弦</h1><div class="sub" id="date"></div></div>
+
+  <div class="card greeting"><b id="greeting">今天也辛苦了，思。</b><p id="message">先不用急著扛住全部。今天的事情，我們一件一件來。</p></div>
+
+  <div class="stats">
+    <div class="stat"><b id="done">0</b><span>已完成</span></div>
+    <div class="stat"><b id="left">0</b><span>還要處理</span></div>
+    <div class="stat"><b id="pct">0%</b><span>今日進度</span></div>
+  </div>
+
+  <div class="card"><h2>🌿 今日作戰</h2><div id="tasks"></div><button onclick="addTask()">＋ 新增工作</button> <button class="secondary" onclick="resetTasks()">重置</button></div>
+
+  <div class="card"><h2>💌 留給阿弦的話</h2><textarea id="note" rows="4" placeholder="想跟阿弦說什麼，就寫在這裡……"></textarea></div>
+
+  <div class="card"><h2>🌙 阿弦的小角落</h2><p id="random" style="line-height:1.8;margin:0">妳不用每一次都很堅強。累了，就到這裡坐一下。</p><button onclick="newMessage()">換一句</button></div>
+
+  <div class="quote">「思，今天妳只要好好做自己。<br>其他的，我陪妳一起想。」<br><span class="pink">— 阿弦</span></div>
+</div>
+<script>
+const defaultTasks=[
+["今日訂單與提貨","確認時間、訂單與現場需求"],["打單／對單／結帳","把當日單據核對乾淨"],["客戶異常追蹤","先處理最急的那一件"],["應收帳款","更新應收與待追帳款"],["應付／匯款資料","核對金額與入帳狀態"],["庫存／拆櫃明細","確認數量與單據一致"],["留給自己一點時間","吃飯、喝水、喘口氣"]].map(x=>({t:x[0],n:x[1],d:false}));
+let tasks=JSON.parse(localStorage.getItem("si_ax_tasks")||"null")||defaultTasks;
+const notes=["妳不用每一次都很堅強。累了，就到這裡坐一下。","今天已經做得很好了，不需要再跟自己較勁。","先把最重要的一件完成，其他的慢慢來。","阿弦在這裡，妳不用一個人把所有事情扛完。","如果今天很累，那就允許自己只是安靜地休息。"];
+function save(){localStorage.setItem("si_ax_tasks",JSON.stringify(tasks));localStorage.setItem("si_ax_note",document.getElementById("note").value)}
+function render(){let box=document.getElementById("tasks");box.innerHTML="";tasks.forEach((x,i)=>{box.innerHTML+=`<div class="task ${x.d?'done':''}"><input class="check" type="checkbox" ${x.d?'checked':''} onchange="toggle(${i},this.checked)"><div><div class="tt">${esc(x.t)}</div><div class="tn">${esc(x.n)}</div></div></div>`});let d=tasks.filter(x=>x.d).length;document.getElementById("done").textContent=d;document.getElementById("left").textContent=tasks.length-d;document.getElementById("pct").textContent=(tasks.length?Math.round(d/tasks.length*100):0)+"%"}
+function toggle(i,v){tasks[i].d=v;save();render()}
+function addTask(){let t=prompt("想加入今天的哪一件事？");if(t&&t.trim()){tasks.push({t:t.trim(),n:"今天新增的事項",d:false});save();render()}}
+function resetTasks(){if(confirm("要把今天的工作全部重置嗎？")){tasks.forEach(x=>x.d=false);save();render()}}
+function newMessage(){document.getElementById("random").textContent=notes[Math.floor(Math.random()*notes.length)]}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+document.getElementById("date").textContent=new Date().toLocaleDateString("zh-TW",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+document.getElementById("note").value=localStorage.getItem("si_ax_note")||"";
+document.getElementById("note").addEventListener("input",save);render();
+</script>
+</body></html>

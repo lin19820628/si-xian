@@ -1,0 +1,9 @@
+{
+  "name":"思與阿弦",
+  "short_name":"思與阿弦",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#eafaf8",
+  "theme_color":"#62c8bd",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
